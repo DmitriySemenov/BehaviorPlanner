@@ -47,11 +47,42 @@ vector<Vehicle> Vehicle::choose_next_state(map<int, vector<Vehicle>>& prediction
 	 * TODO: Your solution here.
 	 */
 
+	// Initialize variables
+	vector<string> possible_successor_states;
+	vector<float> costs;
+	vector<Vehicle> trajectory;
+	string best_state = "KL";
+	float min_cost = 99999;
 
-	 /**
-		* TODO: Change return value here:
-		*/
-	return generate_trajectory("KL", predictions);
+	// Figure out possible successor states from current FSM state
+	possible_successor_states = successor_states();
+
+	// For each possible successor state calculate total cost:
+	for (int i = 0; i < possible_successor_states.size(); ++i) {
+		// Initialize with really high cost
+		float cost = 99999;
+		
+		// Generate trajectory
+		trajectory = generate_trajectory(possible_successor_states[i], predictions);
+
+		// Calculate cost, if trajectory is non-zero
+		if (!trajectory.empty()) {
+			cost = calculate_cost(*this, predictions, trajectory);
+		}
+
+		// Push cost
+		costs.push_back(cost);
+	}
+
+	// Find minimum cost state
+	for (int i = 0; i < possible_successor_states.size(); ++i) {
+		if (costs[i] < min_cost) {
+			min_cost = costs[i];
+			best_state = possible_successor_states[i];
+		}
+	}
+
+	return generate_trajectory(best_state, predictions);
 }
 
 vector<string> Vehicle::successor_states() {
